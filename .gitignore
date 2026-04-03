@@ -65,3 +65,5 @@ __recovery/
 *.stat
 
 *.tmp
+build/i386-win32
+src/classes/Version.pas

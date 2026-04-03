@@ -1,0 +1,6 @@
+-FE../bin
+-Fu../src/classes
+-FU$fpctarget
+-Sm
+-Mdelphi
+-Sh 
