@@ -98,6 +98,7 @@
         <DCCReference Include="..\classes\ParamsParser.pas"/>
         <DCCReference Include="..\classes\WavMaker.pas"/>
         <DCCReference Include="..\classes\AscMaker.pas"/>
+        <DCCReference Include="..\classes\BasicConverter.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

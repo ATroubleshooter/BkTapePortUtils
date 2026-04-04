@@ -6,7 +6,8 @@ uses
   main,
   ParamsParser in '..\classes\ParamsParser.pas',
   WavMaker in  '..\classes\WavMaker.pas',
-  AscMaker in '..\classes\AscMaker.pas';
+  AscMaker in '..\classes\AscMaker.pas',
+  BasicConverter in  '..\classes\BasicConverter.pas' ;
 
 begin
   with TMain.Create() do begin
