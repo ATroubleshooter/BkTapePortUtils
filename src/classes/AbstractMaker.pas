@@ -12,6 +12,7 @@ type
     constructor Create(const Aoutputvalue:string; const Atapenamefixed:string) ;
     procedure WriteDataBlock(const data:TBytes; num:Integer) ; virtual ; abstract ;
     procedure WriteFinalBlock(const data:TBytes) ; virtual ; abstract ;
+    procedure WriteMonoBlock(const data:TBytes) ; virtual ; abstract ;
   end;
 
   TMakerClass = class of TAbstractMaker ;

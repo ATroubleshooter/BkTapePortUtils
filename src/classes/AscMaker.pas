@@ -11,6 +11,7 @@ type
   public
     procedure WriteDataBlock(const data:TBytes; num:Integer) ; override ;
     procedure WriteFinalBlock(const data:TBytes) ; override ;
+    procedure WriteMonoBlock(const data:TBytes) ; override ;
   end;
 
 implementation
@@ -25,6 +26,11 @@ end;
 procedure TAscMaker.WriteFinalBlock(const data: TBytes);
 begin
   WriteASC(data,outputvalue+'\'+tapenamefixed+'.ASC.BIN') ;
+end;
+
+procedure TAscMaker.WriteMonoBlock(const data: TBytes);
+begin
+  WriteASC(data,outputvalue) ;
 end;
 
 procedure TAscMaker.WriteASC(const data: TBytes; const filename: string);

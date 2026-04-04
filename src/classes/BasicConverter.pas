@@ -68,7 +68,7 @@ begin
   if not FileExists(inputfile) then raise Exception.Create('Input file not found: '+inputfile) ;
 
   if tapename.Length>ASC_NAME_LENGTH then
-    raise Exception.CreateFmt('Too long typename (max %d chars)',[ASC_NAME_LENGTH]) ;
+    raise Exception.CreateFmt('Too long tapename (max %d chars)',[ASC_NAME_LENGTH]) ;
 
   maker:=makerclass.Create(outputvalue,tapename+StringOfChar(' ',ASC_NAME_LENGTH-Length(tapename))) ;
 

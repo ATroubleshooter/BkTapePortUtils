@@ -16,6 +16,7 @@ type
   public
     procedure WriteDataBlock(const data:TBytes; num:Integer) ; override ;
     procedure WriteFinalBlock(const data:TBytes) ; override ;
+    procedure WriteMonoBlock(const data:TBytes) ; override ;
   end;
 
 implementation
@@ -43,6 +44,12 @@ end;
 procedure TWavMaker.WriteFinalBlock(const data:TBytes);
 begin
   WriteBlockWithBinName(data,tapenamefixed+'.ASC'+Chr(32)+Chr(32)+StringOfChar(Chr(0),4)) ;
+  SaveWAV() ;
+end ;
+
+procedure TWavMaker.WriteMonoBlock(const data:TBytes);
+begin
+  WriteBlockWithBinName(data,tapenamefixed) ;
   SaveWAV() ;
 end ;
 
@@ -99,7 +106,7 @@ begin
   sum:=0 ;
   for i := 4 to Length(data)-1 do begin
     Inc(sum,data[i]) ;
-    if sum>65535 then Dec(sum,65536) ;
+    if sum>65535 then Dec(sum,65535) ;
   end;
 
   WriteByteAsWav(sum mod 256) ;
