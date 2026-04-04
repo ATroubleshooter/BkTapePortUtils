@@ -163,7 +163,7 @@ begin
   start:=$FBFE ; // Магическое число размера файла для контрольной суммы
 
   stm:=TMemoryStream.Create() ;
-  stm.WriteBuffer(head,Length(head)) ;
+  stm.WriteBuffer(head[0],Length(head)) ;
 
   for i:=0 to lines.count-1 do begin
     buf:=enckoi.GetBytes(lines[i].command) ;
@@ -198,8 +198,9 @@ begin
     // Обновление контрольной суммы
     Dec(start,Length(buf)+4) ;
 
-    stm.WriteBuffer(bufnum,Length(bufnum)) ;
-    stm.WriteBuffer(buf,Length(buf)) ;
+    stm.WriteBuffer(bufnum[0],Length(bufnum)) ;
+    stm.WriteBuffer(buf[0],Length(buf)) ;
+
   end;
   lines.Free ;
 
@@ -207,14 +208,16 @@ begin
 
   SetLength(buf,stm.Size) ;
   stm.Position:=0 ;
-  stm.Read(buf,stm.Size) ;
+  stm.Read(buf[0],stm.Size) ;
   maker.WriteMonoBlock(buf) ;
   stm.Free ;
 
   // Заплатка для того, чтобы в подсказке пользователю вышло корректное название программы,
   // при формировании BIN файла TAPE берется из имени файла без расширения
-  if maker is TBinMaker then
-    tapename:=ExtractFileName(outputfile).Replace(ExtractFileExt(outputfile),'').Trim().ToUpper() ;
+  if maker is TBinMaker then begin
+    tapename:=Trim(ExtractFileName(outputfile)) ;
+    tapename:=tapename.Replace(ExtractFileExt(tapename),'').ToUpper() ;
+  end;
 
   maker.Free ;
 end;
