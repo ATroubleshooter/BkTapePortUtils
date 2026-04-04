@@ -11,7 +11,7 @@ type
 
 implementation
 uses Generics.Collections,  Math,
-  Version, ParamsParser,WavMaker ;
+  Version, ParamsParser, WavMaker, AscMaker, AbstractMaker ;
 
 const MAINHELP = 'Converter from Basic for BK-0010 to ASC-files for GID emulator or WAV file for tape port'#13#10+
   'Version: '+TGitVersion.TAG+#13#10+
@@ -26,22 +26,18 @@ ASC_NAME_LENGTH = 6 ;
 HEADER_SIZE = 4 ;
 MAX_BLOCK_SIZE = 256 ;
 
-type TOutFormat = (ofASC,ofWAV) ;
-
 procedure TMain.Run() ;
 var i:Integer ;
     pairs:TStringList ;
-    inputfile,outputvalue:string ;
-    tapename,tapenamefixed:string ;
-    outformat:TOutFormat;
+    tapename:string ;
+    maker:TAbstractMaker ;
+    makerclass:TMakerClass ;
 
     s:string ;
     source:TStringList ;
     data:TList<Byte> ;
     j,filecnt,blocksize:Integer ;
-    wm:TWavMaker ;
     buf:TBytes ;
-    binfile:string ;
 begin
   try
     if ParamCount<2 then begin
@@ -49,17 +45,16 @@ begin
       Halt(1) ;
     end;
 
-    inputfile:=ParamStr(1) ;
-    if not FileExists(inputfile) then raise Exception.Create('Input file not found: '+inputfile) ;
+    if not FileExists(ParamStr(1)) then raise Exception.Create('Input file not found: '+ParamStr(1)) ;
 
-    outputvalue:=ParamStr(2) ;
     tapename:='PROG' ;
-    outformat:=ofASC ;
+    makerclass:=TAscMaker ;
+
     pairs:=createParamPairsFromIndex(3) ;
     for i := 0 to pairs.Count-1 do begin
       if pairs.Names[i]='format' then begin
-        if pairs.ValueFromIndex[i].ToUpper()='WAV' then outformat:=ofWAV else
-        if pairs.ValueFromIndex[i].ToUpper()='ASC' then outformat:=ofASC else
+        if pairs.ValueFromIndex[i].ToUpper()='WAV' then makerclass:=TWavMaker else
+        if pairs.ValueFromIndex[i].ToUpper()='ASC' then makerclass:=TAscMaker else
         raise Exception.Create('Unknown output format: '+pairs.ValueFromIndex[i]) ;
       end
       else
@@ -68,12 +63,13 @@ begin
     end;
     pairs.Free ;
 
-    if outformat=ofASC then
-      if tapename.Length>ASC_NAME_LENGTH then
-        raise Exception.CreateFmt('Too long typename (max %d chars)',[ASC_NAME_LENGTH]) ;
+    if tapename.Length>ASC_NAME_LENGTH then
+      raise Exception.CreateFmt('Too long typename (max %d chars)',[ASC_NAME_LENGTH]) ;
+
+    maker:=makerclass.Create(ParamStr(2),tapename+StringOfChar(' ',ASC_NAME_LENGTH-Length(tapename))) ;
 
     source:=TStringList.Create ;
-    source.LoadFromFile(inputfile,TEncoding.GetEncoding(20866)) ;
+    source.LoadFromFile(ParamStr(1),TEncoding.GetEncoding(20866)) ;
     data:=TList<Byte>.Create() ;
     for s in source do begin
       data.AddRange(TEncoding.GetEncoding(20866).GetBytes(s.Trim())) ;
@@ -85,9 +81,6 @@ begin
     filecnt:=data.Count div MAX_BLOCK_SIZE ;
     if data.Count mod MAX_BLOCK_SIZE<>0 then Inc(filecnt) ;
 
-    tapenamefixed:=tapename+StringOfChar(' ',ASC_NAME_LENGTH-Length(tapename)) ;
-
-    wm:=TWavMaker.Create() ;
     for i := 0 to filecnt-1 do begin
       blocksize:=IfThen(i=filecnt-1,data.Count-(filecnt-1)*MAX_BLOCK_SIZE,MAX_BLOCK_SIZE) ;
       SetLength(buf,blocksize+HEADER_SIZE) ;
@@ -98,17 +91,7 @@ begin
       for j := 0 to blocksize-1 do
         buf[HEADER_SIZE+j]:=data[i*MAX_BLOCK_SIZE+j] ;
 
-      if outformat=ofWAV then
-        wm.AppendBinData(buf,Format('%s.ASC #%.3d',[tapenamefixed,i])+Chr(26))
-      else begin
-        binfile:=outputvalue+'\'+Format('%s.ASC #%.3d.BIN',[tapenamefixed,i]) ;
-        if FileExists(binfile) then SysUtils.DeleteFile(binfile) ;
-
-        with TFileStream.Create(binfile,fmCreate) do begin
-          WriteBuffer(buf[0],Length(buf)) ;
-          Free ;
-        end;
-      end;
+      maker.WriteDataBlock(buf,i) ;
     end;
 
     SetLength(buf,6) ;
@@ -119,19 +102,8 @@ begin
     buf[4]:=Byte(0) ;
     buf[5]:=Byte(0) ;
 
-    if outformat=ofWAV then begin
-      wm.AppendBinData(buf,tapenamefixed+'.ASC'+Chr(32)+Chr(32)+StringOfChar(Chr(0),4)) ;
-      wm.WriteToWav(outputvalue) ;
-    end
-    else begin
-      binfile:=outputvalue+'\'+tapenamefixed+'.ASC.BIN' ;
-      if FileExists(binfile) then SysUtils.DeleteFile(binfile) ;
-
-      with TFileStream.Create(binfile,fmCreate) do begin
-        WriteBuffer(buf[0],Length(buf)) ;
-        Free ;
-      end;
-    end;
+    maker.WriteFinalBlock(buf) ;
+    maker.Free ;
 
     Writeln('File(s) written, use LOAD "'+tapename+'" for loading BASIC program') ;
     data.Free ;

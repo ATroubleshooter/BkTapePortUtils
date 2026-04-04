@@ -1,20 +1,21 @@
 unit WavMaker;
 
 interface
-uses Classes, SysUtils ;
+uses Classes, SysUtils,
+  AbstractMaker ;
 
 type
-  TWavMaker = class
+  TWavMaker = class(TAbstractMaker)
   private
     stm:TMemoryStream ;
     procedure WriteByteAsWav(b:Byte) ;
     procedure WriteByteArray(arr:array of Byte) ;
     procedure WriteCheckSum(const data:TBytes) ;
+    procedure WriteBlockWithBinName(const data:TBytes; const binname:AnsiString) ;
+    procedure SaveWAV() ;
   public
-    constructor Create ;
-    procedure AppendBinData(const data:TBytes; const binname:AnsiString) ;
-    procedure WriteToWav(const filename:string) ;
-    destructor Destroy ; override ;
+    procedure WriteDataBlock(const data:TBytes; num:Integer) ; override ;
+    procedure WriteFinalBlock(const data:TBytes) ; override ;
   end;
 
 implementation
@@ -34,9 +35,22 @@ var ST_4:array[0..63] of Byte = (128,143,168,181,188,191,193,193,194,194,194,194
 
 { TWavMaker }
 
-procedure TWavMaker.AppendBinData(const data:TBytes; const binname:AnsiString);
+procedure TWavMaker.WriteDataBlock(const data:TBytes; num:Integer) ;
+begin
+  WriteBlockWithBinName(data,Format('%s.ASC #%.3d',[tapenamefixed,num])+Chr(26)) ;
+end;
+
+procedure TWavMaker.WriteFinalBlock(const data:TBytes);
+begin
+  WriteBlockWithBinName(data,tapenamefixed+'.ASC'+Chr(32)+Chr(32)+StringOfChar(Chr(0),4)) ;
+  SaveWAV() ;
+end ;
+
+procedure TWavMaker.WriteBlockWithBinName(const data:TBytes; const binname:AnsiString) ;
 var i:Integer ;
 begin
+  if stm=nil then stm:=TMemoryStream.Create() ;
+
   for i := 1 to 512 do
     WriteByteArray(ST_2) ;
   WriteByteArray(ST_SYNCHRO) ;
@@ -46,7 +60,6 @@ begin
 
   for i := 0 to 3 do
     WriteByteAsWav(data[i]) ;
-
   for i := 1 to 16 do
     WriteByteAsWav(Ord(binname[i])) ;
 
@@ -63,17 +76,6 @@ begin
   for i := 1 to 32 do
     WriteByteArray(ST_2) ;
   WriteByteArray(ST_SYNCHRO) ;
-end;
-
-constructor TWavMaker.Create;
-begin
-  stm:=TMemoryStream.Create() ;
-end;
-
-destructor TWavMaker.Destroy;
-begin
-  stm.Free ;
-  inherited Destroy;
 end;
 
 procedure TWavMaker.WriteByteArray(arr:array of Byte);
@@ -104,7 +106,7 @@ begin
   WriteByteAsWav(sum div 256) ;
 end;
 
-procedure TWavMaker.WriteToWav(const filename: string);
+procedure TWavMaker.SaveWAV() ;
 var stmf:TFileStream ;
 
 procedure WriteChars(const v:AnsiString) ;
@@ -123,7 +125,7 @@ begin
 end;
 
 begin
-  stmf:=TFileStream.Create(filename,fmCreate) ;
+  stmf:=TFileStream.Create(outputvalue,fmCreate) ;
 
   WriteChars('RIFF') ;
   WriteUInt32(stm.Size+36) ;
@@ -141,8 +143,8 @@ begin
   stm.Position:=0 ;
   stmf.CopyFrom(stm,stm.Size) ;
   stmf.Free ;
-end;
 
-initialization
+  stm.Free ;
+end;
 
 end.
