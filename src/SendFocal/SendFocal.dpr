@@ -6,7 +6,7 @@ uses
   main,
   ParamsParser in '..\classes\ParamsParser.pas',
   WavMaker in  '..\classes\WavMaker.pas',
-  AscMaker in '..\classes\AscMaker.pas',
+  BinMaker in '..\classes\BinMaker.pas',
   FocalConverter in  '..\classes\FocalConverter.pas' ;
 
 begin

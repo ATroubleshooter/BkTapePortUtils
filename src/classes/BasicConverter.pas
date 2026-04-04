@@ -18,7 +18,7 @@ type
   end;
 
 implementation
-uses AscMaker,WavMaker, Generics.Collections, Math ;
+uses BinMaker,WavMaker, Generics.Collections, Math ;
 
 const ASC_NAME_LENGTH = 6 ;
       HEADER_SIZE = 4 ;
@@ -29,7 +29,7 @@ const ASC_NAME_LENGTH = 6 ;
 constructor TBasicConverter.Create();
 begin
   tapename:='PROG' ;
-  makerclass:=TAscMaker ;
+  makerclass:=TBinMaker ;
 end;
 
 procedure TBasicConverter.SetParamsFromPairs(pairs: TStringList);
@@ -38,7 +38,7 @@ begin
   for i := 0 to pairs.Count-1 do begin
     if pairs.Names[i]='format' then begin
       if pairs.ValueFromIndex[i].ToUpper()='WAV' then makerclass:=TWavMaker else
-      if pairs.ValueFromIndex[i].ToUpper()='ASC' then makerclass:=TAscMaker else
+      if pairs.ValueFromIndex[i].ToUpper()='ASC' then makerclass:=TBinMaker else
       raise Exception.Create('Unknown output format: '+pairs.ValueFromIndex[i]) ;
     end
     else

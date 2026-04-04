@@ -97,8 +97,8 @@
         </DelphiCompile>
         <DCCReference Include="..\classes\ParamsParser.pas"/>
         <DCCReference Include="..\classes\WavMaker.pas"/>
-        <DCCReference Include="..\classes\AscMaker.pas"/>
-        <DCCReference Include="..\classes\BasicConverter.pas"/>
+        <DCCReference Include="..\classes\BinMaker.pas"/>
+        <DCCReference Include="..\classes\FocalConverter.pas"/>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
         </BuildConfiguration>

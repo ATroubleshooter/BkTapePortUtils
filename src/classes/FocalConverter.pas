@@ -25,7 +25,7 @@ type
   end;
 
 implementation
-uses AscMaker,WavMaker, Math ;
+uses BinMaker,WavMaker, Math ;
 
 const BIN_NAME_LENGTH = 16 ;
       TERM = $8E ; // Конец строки Фокала
@@ -58,7 +58,7 @@ end;
 constructor TFocalConverter.Create();
 begin
   tapename:='PROG' ;
-  makerclass:=TAscMaker ;
+  makerclass:=TBinMaker ;
 end;
 
 procedure TFocalConverter.SetParamsFromPairs(pairs: TStringList);
@@ -67,7 +67,7 @@ begin
   for i := 0 to pairs.Count-1 do begin
     if pairs.Names[i]='format' then begin
       if pairs.ValueFromIndex[i].ToUpper()='WAV' then makerclass:=TWavMaker else
-      if pairs.ValueFromIndex[i].ToUpper()='BIN' then makerclass:=TAscMaker else
+      if pairs.ValueFromIndex[i].ToUpper()='BIN' then makerclass:=TBinMaker else
       raise Exception.Create('Unknown output format: '+pairs.ValueFromIndex[i]) ;
     end
     else
@@ -210,6 +210,11 @@ begin
   stm.Read(buf,stm.Size) ;
   maker.WriteMonoBlock(buf) ;
   stm.Free ;
+
+  // Заплатка для того, чтобы в подсказке пользователю вышло корректное название программы,
+  // при формировании BIN файла TAPE берется из имени файла без расширения
+  if maker is TBinMaker then
+    tapename:=ExtractFileName(outputfile).Replace(ExtractFileExt(outputfile),'').Trim().ToUpper() ;
 
   maker.Free ;
 end;

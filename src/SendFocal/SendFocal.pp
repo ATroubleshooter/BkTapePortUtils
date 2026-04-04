@@ -1,4 +1,4 @@
-﻿program SendBasic;
+﻿program SendFocal;
 
 uses main ;
 
