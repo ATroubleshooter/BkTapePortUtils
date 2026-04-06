@@ -11,7 +11,7 @@ type
   end;
 
 implementation
-uses AbstractMaker, Generics.Collections, Math ;
+uses AbstractMaker, WavMaker, Generics.Collections, Math ;
 
 const ASC_NAME_LENGTH = 6 ;
       HEADER_SIZE = 4 ;
@@ -33,6 +33,8 @@ begin
     raise Exception.CreateFmt('Too long tapename (max %d chars)',[ASC_NAME_LENGTH]) ;
 
   maker:=makerclass.Create(outputvalue,tapename+StringOfChar(' ',ASC_NAME_LENGTH-Length(tapename))) ;
+  // «аплатка дл€ передачи в конкретный класс доппараметра - длины тишины в начале и конце
+  if maker is TWavMaker then TWavMaker(maker).SetSilentLen(silentlen) ;
 
   source:=TStringList.Create ;
   source.LoadFromFile(ParamStr(1),TEncoding.GetEncoding(20866)) ;

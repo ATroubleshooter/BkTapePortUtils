@@ -19,7 +19,7 @@ type
   end;
 
 implementation
-uses AbstractMaker, BinMaker, Math ;
+uses AbstractMaker, WavMaker, BinMaker, Math ;
 
 const BIN_NAME_LENGTH = 16 ;
       TERM = $8E ; // Конец строки Фокала
@@ -167,6 +167,8 @@ begin
   lines.Free ;
 
   maker:=makerclass.Create(outputfile,tapename+StringOfChar(chr(32),BIN_NAME_LENGTH-Length(tapename))) ;
+  // Заплатка для передачи в конкретный класс доппараметра - длины тишины в начале и конце
+  if maker is TWavMaker then TWavMaker(maker).SetSilentLen(silentlen) ;
 
   SetLength(buf,stm.Size) ;
   stm.Position:=0 ;

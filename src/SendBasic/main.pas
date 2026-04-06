@@ -16,8 +16,9 @@ const MAINHELP = 'Converter from Basic for BK-0010 to ASC-files for GID emulator
   'Version: '+TGitVersion.TAG+#13#10+
   'Usage: input_file output_value [parameters]'#13#10+
   'Parameters:'#13#10+
-  '/format=ASC|WAV - make ASC file for GID or WAV file for tape port (default ASC)'#13#10+
+  '/format=ASC|WAV - make ASC file(s) for GID or WAV file for tape port (default ASC)'#13#10+
   '/name=value - set name for LOAD command (default PROG)'#13#10+
+  '/silentlen=num - set duration in seconds for silent before and after data in WAV (default 0)'#13#10+
   'If /format set to ASC, output_value - directory for saving ASC-files'#13#10+
   'If /format set to WAV, output_value - WAV filename'#13#10 ;
 

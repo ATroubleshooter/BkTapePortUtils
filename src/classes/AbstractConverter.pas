@@ -8,6 +8,7 @@ type
   TAbstractConverter = class
   protected
     tapename:string ;
+    silentlen:Integer ;
     makerclass:TMakerClass ;
   public
     procedure SetParamsFromPairs(pairs:TStringList) ;
@@ -24,6 +25,7 @@ constructor TAbstractConverter.Create();
 begin
   tapename:='PROG' ;
   makerclass:=TBinMaker ;
+  silentlen:=0 ;
 end;
 
 procedure TAbstractConverter.SetParamsFromPairs(pairs: TStringList) ;
@@ -38,6 +40,7 @@ begin
     end
     else
     if pairs.Names[i]='name' then tapename:=pairs.ValueFromIndex[i] else
+    if pairs.Names[i]='silentlen' then silentlen:=StrToInt(pairs.ValueFromIndex[i]) else
       raise Exception.Create('Unknown parameter: '+pairs.Names[i]) ;
   end;
 end;

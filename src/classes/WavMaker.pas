@@ -8,12 +8,14 @@ type
   TWavMaker = class(TAbstractMaker)
   private
     stm:TMemoryStream ;
+    silentlen:Integer ;
     procedure WriteByteAsWav(b:Byte) ;
     procedure WriteByteArray(arr:array of Byte) ;
     procedure WriteCheckSum(const data:TBytes) ;
     procedure WriteBlockWithBinName(const data:TBytes; const binname:AnsiString) ;
     procedure SaveWAV() ;
   public
+    procedure SetSilentLen(value:Integer) ;
     procedure WriteDataBlock(const data:TBytes; num:Integer) ; override ;
     procedure WriteFinalBlock(const data:TBytes) ; override ;
     procedure WriteMonoBlock(const data:TBytes) ; override ;
@@ -52,6 +54,11 @@ begin
   WriteBlockWithBinName(data,tapenamefixed) ;
   SaveWAV() ;
 end ;
+
+procedure TWavMaker.SetSilentLen(value: Integer);
+begin
+  silentlen:=value ;
+end;
 
 procedure TWavMaker.WriteBlockWithBinName(const data:TBytes; const binname:AnsiString) ;
 var i:Integer ;
@@ -115,6 +122,9 @@ end;
 
 procedure TWavMaker.SaveWAV() ;
 var stmf:TFileStream ;
+    i:Integer ;
+    b:Byte ;
+    bufsilent:TArray<Byte> ;
 
 procedure WriteChars(const v:AnsiString) ;
 begin
@@ -134,8 +144,15 @@ end;
 begin
   stmf:=TFileStream.Create(outputvalue,fmCreate) ;
 
+  if stm=nil then stm:=TMemoryStream.Create() ;
+
+  SetLength(bufsilent,silentlen*FREQ) ;
+  b:=128 ;
+  for i := 0 to Length(bufsilent)-1 do
+    bufsilent[i]:=b ;
+
   WriteChars('RIFF') ;
-  WriteUInt32(stm.Size+36) ;
+  WriteUInt32(stm.Size+2*Length(bufsilent)+36) ;
   WriteChars('WAVEfmt ') ;
   WriteUInt32(SUBCHUNKSIZE) ;
   WriteUInt16(PCM) ;
@@ -145,10 +162,12 @@ begin
   WriteUInt16(BLOCKALIGN) ;
   WriteUInt16(BITS) ;
   WriteChars('data') ;
-  WriteUInt32(stm.Size) ;
+  WriteUInt32(stm.Size+2*Length(bufsilent)) ;
 
+  stmf.WriteBuffer(bufsilent[0],Length(bufsilent)) ;
   stm.Position:=0 ;
   stmf.CopyFrom(stm,stm.Size) ;
+  stmf.WriteBuffer(bufsilent[0],Length(bufsilent)) ;
   stmf.Free ;
 
   stm.Free ;

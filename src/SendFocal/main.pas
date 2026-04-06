@@ -18,6 +18,7 @@ const MAINHELP = 'Converter from Focal for BK-0010 to BIN-file for GID emulator 
   'Parameters:'#13#10+
   '/format=BIN|WAV - make BIN file for GID or WAV file for tape port (default BIN)'#13#10+
   '/name=value - set name for L G command (default PROG)'#13#10+
+  '/silentlen=num - set duration in seconds for silent before and after data in WAV (default 0)'#13#10+
   '"name" parameter not using for BIN file, only for encoding WAV file internal data' ;
 
 procedure TMain.Run() ;
@@ -38,7 +39,7 @@ begin
 
     converter.Run(ParamStr(1),ParamStr(2)) ;
 
-    Writeln('File(s) written, use L G '+converter.getTapeName()+' for loading FOCAL program') ;
+    Writeln('File written, use L G '+converter.getTapeName()+' for loading FOCAL program') ;
     converter.Free ;
   except
     on E: Exception do begin
