@@ -2,7 +2,7 @@ unit FocalConverter ;
 
 interface
 uses Classes, SysUtils, Generics.Collections,
-  AbstractMaker ;
+  AbstractConverter ;
 
 type
   TFocalLine = record
@@ -11,21 +11,15 @@ type
     command:string ;
   end;
 
-  TFocalConverter = class
+  TFocalConverter = class(TAbstractConverter)
   private
-    tapename:string ;
-    makerclass:TMakerClass ;
     function CreateFocalProg(const prog:TStringList):TList<TFocalLine> ;
   public
-    constructor Create() ;
-    destructor Destroy ; override ;
-    procedure SetParamsFromPairs(pairs:TStringList) ;
     procedure Run(const inputfile:string; const outputfile:string) ;
-    function getTapeName():string ;
   end;
 
 implementation
-uses BinMaker,WavMaker, Math ;
+uses AbstractMaker, BinMaker, Math ;
 
 const BIN_NAME_LENGTH = 16 ;
       TERM = $8E ; // Конец строки Фокала
@@ -55,29 +49,7 @@ end;
 
 { TFocalConverter }
 
-constructor TFocalConverter.Create();
-begin
-  tapename:='PROG' ;
-  makerclass:=TBinMaker ;
-end;
-
-procedure TFocalConverter.SetParamsFromPairs(pairs: TStringList);
-var i:Integer ;
-begin
-  for i := 0 to pairs.Count-1 do begin
-    if pairs.Names[i]='format' then begin
-      if pairs.ValueFromIndex[i].ToUpper()='WAV' then makerclass:=TWavMaker else
-      if pairs.ValueFromIndex[i].ToUpper()='BIN' then makerclass:=TBinMaker else
-      raise Exception.Create('Unknown output format: '+pairs.ValueFromIndex[i]) ;
-    end
-    else
-    if pairs.Names[i]='name' then tapename:=pairs.ValueFromIndex[i] else
-      raise Exception.Create('Unknown parameter: '+pairs.Names[i]) ;
-  end;
-end;
-
-function TFocalConverter.CreateFocalProg(
-  const prog: TStringList): TList<TFocalLine>;
+function TFocalConverter.CreateFocalProg(const prog: TStringList): TList<TFocalLine>;
 var tmp,tmp1:TArray<string> ;
     fl:TFocalLine ;
     s:string ;
@@ -100,16 +72,6 @@ begin
 
     Result.Add(fl) ;
   end;
-end;
-
-destructor TFocalConverter.Destroy;
-begin
-  inherited Destroy;
-end;
-
-function TFocalConverter.getTapeName: string;
-begin
-  Result:=tapename ;
 end;
 
 procedure TFocalConverter.Run(const inputfile:string; const outputfile:string);

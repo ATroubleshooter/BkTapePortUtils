@@ -2,60 +2,22 @@ unit BasicConverter ;
 
 interface
 uses Classes, SysUtils,
-  AbstractMaker ;
+  AbstractConverter ;
 
 type
-  TBasicConverter = class
-  private
-    tapename:string ;
-    makerclass:TMakerClass ;
+  TBasicConverter = class(TAbstractConverter)
   public
-    constructor Create() ;
-    destructor Destroy ; override ;
-    procedure SetParamsFromPairs(pairs:TStringList) ;
     procedure Run(const inputfile:string; const outputvalue:string) ;
-    function getTapeName():string ;
   end;
 
 implementation
-uses BinMaker,WavMaker, Generics.Collections, Math ;
+uses AbstractMaker, Generics.Collections, Math ;
 
 const ASC_NAME_LENGTH = 6 ;
       HEADER_SIZE = 4 ;
       MAX_BLOCK_SIZE = 256 ;
 
 { TBasicConverter }
-
-constructor TBasicConverter.Create();
-begin
-  tapename:='PROG' ;
-  makerclass:=TBinMaker ;
-end;
-
-procedure TBasicConverter.SetParamsFromPairs(pairs: TStringList);
-var i:Integer ;
-begin
-  for i := 0 to pairs.Count-1 do begin
-    if pairs.Names[i]='format' then begin
-      if pairs.ValueFromIndex[i].ToUpper()='WAV' then makerclass:=TWavMaker else
-      if pairs.ValueFromIndex[i].ToUpper()='ASC' then makerclass:=TBinMaker else
-      raise Exception.Create('Unknown output format: '+pairs.ValueFromIndex[i]) ;
-    end
-    else
-    if pairs.Names[i]='name' then tapename:=pairs.ValueFromIndex[i] else
-      raise Exception.Create('Unknown parameter: '+pairs.Names[i]) ;
-  end;
-end;
-
-destructor TBasicConverter.Destroy;
-begin
-  inherited Destroy;
-end;
-
-function TBasicConverter.getTapeName: string;
-begin
-  Result:=tapename ;
-end;
 
 procedure TBasicConverter.Run(const inputfile:string; const outputvalue:string);
 var maker:TAbstractMaker ;
