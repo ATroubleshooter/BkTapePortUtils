@@ -1,4 +1,4 @@
-﻿program SendFocal;
+﻿program BkSendBasic;
 
 uses main ;
 
